@@ -1,234 +1,297 @@
-const itemModel = require('../models/itemModel');
+const { queryAsync } = require('../config/db');
+const { sanitizeInput, sanitizeItem } = require('../middleware/validate');
 
-// GET all items
-exports.getAllItems = async (req, res, next) => {
+// ─── GET /api/items ───────────────────────────────────────────────────────────
+// Optional query params: ?category=Lost|Found  &status=Active|Claimed
+const getAllItems = async (req, res, next) => {
     try {
-        const items = await itemModel.getAllItems();
-        res.status(200).json({
-            success: true,
-            count: items.length,
-            data: items
-        });
+        let sql = 'SELECT * FROM report WHERE 1=1';
+        const params = [];
+
+        // Filter by category
+        if (req.query.category) {
+            const cat = sanitizeInput(req.query.category);
+            if (!['Lost', 'Found'].includes(cat)) {
+                return res.status(400).json({ success: false, message: 'Invalid category' });
+            }
+            sql += ' AND category = ?';
+            params.push(cat);
+        }
+
+        // Filter by status
+        if (req.query.status) {
+            const status = sanitizeInput(req.query.status);
+            if (!['Active', 'Claimed'].includes(status)) {
+                return res.status(400).json({ success: false, message: 'Invalid status' });
+            }
+            sql += ' AND status = ?';
+            params.push(status);
+        }
+
+        // Filter by email (for My Reports page)
+        if (req.query.email) {
+            sql += ' AND contact_email = ?';
+            params.push(sanitizeInput(req.query.email));
+        }
+
+        sql += ' ORDER BY created_at DESC';
+
+        const items = await queryAsync(sql, params);
+
+        res.json({ success: true, data: items });
     } catch (error) {
         next(error);
     }
 };
 
-// GET single item
-exports.getItem = async (req, res, next) => {
+// ─── GET /api/items/stats ─────────────────────────────────────────────────────
+const getStats = async (req, res, next) => {
     try {
-        const item = await itemModel.getItemById(req.params.id);
-        
-        if (!item) {
-            return res.status(404).json({
-                success: false,
-                message: 'Item not found'
-            });
-        }
-        
-        res.status(200).json({
-            success: true,
-            data: item
-        });
+        const stats = await queryAsync(`
+            SELECT
+                COUNT(*) AS total,
+                SUM(category = 'Lost') AS lost,
+                SUM(category = 'Found') AS found,
+                SUM(status = 'Active') AS active,
+                SUM(status = 'Claimed') AS claimed
+            FROM report
+        `, []);
+
+        res.json({ success: true, data: stats[0] });
     } catch (error) {
         next(error);
     }
 };
 
-// POST create item
-exports.createItem = async (req, res, next) => {
+// ─── GET /api/items/category/:category ───────────────────────────────────────
+const getItemsByCategory = async (req, res, next) => {
     try {
-        console.log('Received form data:', JSON.stringify(req.body, null, 2));
-        const { 
-            title, 
-            description, 
-            category,
-            location,
-            contact_email,
-            contact_phone,
-            status 
-        } = req.body;
-        
-        // Validate required fields
-        if (!title || !description || !category || !location) {
-            console.log('Missing fields:', { title, description, category, location });
-            return res.status(400).json({
-                success: false,
-                message: 'Missing required fields. Please provide: title, description, category, location'
-            });
-        }
-        
-        // Validate category
+        const category = sanitizeInput(req.params.category);
+
         if (!['Lost', 'Found'].includes(category)) {
-            return res.status(400).json({
-                success: false,
-                message: 'Category must be either Lost or Found'
-            });
-        }
-        
-        // Ensure at least one contact method
-        if (!contact_email && !contact_phone) {
-            return res.status(400).json({
-                success: false,
-                message: 'Please provide at least one contact method (email or phone)'
-            });
+            return res.status(400).json({ success: false, message: 'Invalid category. Use Lost or Found.' });
         }
 
-        console.log('Validation passed, calling model...');
-        
-        const id = await itemModel.createItem({ 
-            title, 
-            description, 
-            category,
-            location,
-            contact_email,
-            contact_phone,
+        // Parameterized query — prevents SQL injection
+        const items = await queryAsync(
+            'SELECT * FROM report WHERE category = ? ORDER BY created_at DESC',
+            [category]
+        );
+
+        res.json({ success: true, data: items });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// ─── GET /api/items/:id ───────────────────────────────────────────────────────
+const getItem = async (req, res, next) => {
+    try {
+        const id = parseInt(req.params.id);
+
+        if (isNaN(id) || id <= 0) {
+            return res.status(400).json({ success: false, message: 'Invalid item ID' });
+        }
+
+        const items = await queryAsync(
+            'SELECT * FROM report WHERE id = ?',
+            [id]
+        );
+
+        if (items.length === 0) {
+            return res.status(404).json({ success: false, message: 'Item not found' });
+        }
+
+        res.json({ success: true, data: items[0] });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// ─── POST /api/items ──────────────────────────────────────────────────────────
+const createItem = async (req, res, next) => {
+    try {
+        // Server-side validation
+        const { title, description, category, location, contact_email, contact_phone, status } = req.body;
+
+        const errors = [];
+
+        if (!title || title.trim().length === 0)           errors.push('Title is required');
+        if (title && title.trim().length > 255)            errors.push('Title must be under 255 characters');
+        if (!description || description.trim().length === 0) errors.push('Description is required');
+        if (!category)                                     errors.push('Category is required');
+        if (!['Lost', 'Found'].includes(category))         errors.push('Category must be Lost or Found');
+        if (!location || location.trim().length === 0)     errors.push('Location is required');
+        if (location && location.trim().length > 255)      errors.push('Location must be under 255 characters');
+
+        if (!contact_email && !contact_phone) {
+            errors.push('At least one contact method is required');
+        }
+
+        if (contact_email) {
+            const emailPattern = /^[a-zA-Z0-9._%+-]+@qiu\.edu\.my$/;
+            if (!emailPattern.test(contact_email.trim())) {
+                errors.push('Please use a valid QIU email (xxxx@qiu.edu.my)');
+            }
+        }
+
+        if (contact_phone) {
+            const phoneDigits = contact_phone.replace(/\D/g, '');
+            if (phoneDigits.length < 8 || phoneDigits.length > 15) {
+                errors.push('Please enter a valid phone number');
+            }
+        }
+
+        if (errors.length > 0) {
+            return res.status(400).json({ success: false, message: errors.join(', ') });
+        }
+
+        // Sanitize all inputs before storing
+        const clean = sanitizeItem({
+            title, description, category, location,
+            contact_email: contact_email || null,
+            contact_phone: contact_phone || null,
             status: status || 'Active'
         });
 
-        console.log('Created item with ID:', id);
-        
-        const newItem = await itemModel.getItemById(id);
-        
-        res.status(201).json({
-            success: true,
-            data: newItem
-        });
+        // Parameterized INSERT — prevents SQL injection
+        const result = await queryAsync(
+            `INSERT INTO report (title, description, category, location, contact_email, contact_phone, status)
+             VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [clean.title, clean.description, clean.category, clean.location,
+             clean.contact_email, clean.contact_phone, clean.status]
+        );
+
+        // Fetch the newly created record
+        const newItem = await queryAsync('SELECT * FROM report WHERE id = ?', [result.insertId]);
+
+        res.status(201).json({ success: true, data: newItem[0] });
     } catch (error) {
         next(error);
     }
 };
 
-// PUT update item
-exports.updateItem = async (req, res, next) => {
+// ─── PUT /api/items/:id ───────────────────────────────────────────────────────
+const updateItem = async (req, res, next) => {
     try {
-        // If contact info is being updated, validate at least one exists
-        if (req.body.contact_email !== undefined || req.body.contact_phone !== undefined) {
-            const currentItem = await itemModel.getItemById(req.params.id);
-            if (!currentItem) {
-                return res.status(404).json({
-                    success: false,
-                    message: 'Item not found'
-                });
-            }
-            
-            const newEmail = req.body.contact_email !== undefined ? req.body.contact_email : currentItem.contact_email;
-            const newPhone = req.body.contact_phone !== undefined ? req.body.contact_phone : currentItem.contact_phone;
-            
-            if (!newEmail && !newPhone) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'At least one contact method must be provided'
-                });
+        const id = parseInt(req.params.id);
+        if (isNaN(id) || id <= 0) {
+            return res.status(400).json({ success: false, message: 'Invalid item ID' });
+        }
+
+        // Check item exists
+        const existing = await queryAsync('SELECT * FROM report WHERE id = ?', [id]);
+        if (existing.length === 0) {
+            return res.status(404).json({ success: false, message: 'Item not found' });
+        }
+
+        const { title, description, category, location, contact_email, contact_phone, status } = req.body;
+
+        const errors = [];
+
+        if (title !== undefined) {
+            if (title.trim().length === 0)   errors.push('Title cannot be empty');
+            if (title.trim().length > 255)   errors.push('Title must be under 255 characters');
+        }
+        if (category !== undefined && !['Lost', 'Found'].includes(category)) {
+            errors.push('Category must be Lost or Found');
+        }
+        if (status !== undefined && !['Active', 'Claimed'].includes(status)) {
+            errors.push('Status must be Active or Claimed');
+        }
+        if (contact_email !== undefined && contact_email) {
+            const emailPattern = /^[a-zA-Z0-9._%+-]+@qiu\.edu\.my$/;
+            if (!emailPattern.test(contact_email.trim())) {
+                errors.push('Please use a valid QIU email');
             }
         }
-        
-        const updated = await itemModel.updateItem(req.params.id, req.body);
-        
-        if (!updated) {
-            return res.status(404).json({
-                success: false,
-                message: 'Item not found or no changes made'
-            });
+
+        if (errors.length > 0) {
+            return res.status(400).json({ success: false, message: errors.join(', ') });
         }
-        
-        const item = await itemModel.getItemById(req.params.id);
-        
-        res.status(200).json({
-            success: true,
-            data: item
-        });
+
+        // Build update fields dynamically — only update provided fields
+        const fields = [];
+        const params = [];
+
+        if (title !== undefined)         { fields.push('title = ?');         params.push(sanitizeInput(title)); }
+        if (description !== undefined)   { fields.push('description = ?');   params.push(sanitizeInput(description)); }
+        if (category !== undefined)      { fields.push('category = ?');      params.push(sanitizeInput(category)); }
+        if (location !== undefined)      { fields.push('location = ?');      params.push(sanitizeInput(location)); }
+        if (contact_email !== undefined) { fields.push('contact_email = ?'); params.push(sanitizeInput(contact_email)); }
+        if (contact_phone !== undefined) { fields.push('contact_phone = ?'); params.push(sanitizeInput(contact_phone)); }
+        if (status !== undefined)        { fields.push('status = ?');        params.push(sanitizeInput(status)); }
+
+        if (fields.length === 0) {
+            return res.status(400).json({ success: false, message: 'No fields to update' });
+        }
+
+        params.push(id);
+        await queryAsync(`UPDATE report SET ${fields.join(', ')} WHERE id = ?`, params);
+
+        const updated = await queryAsync('SELECT * FROM report WHERE id = ?', [id]);
+        res.json({ success: true, data: updated[0] });
     } catch (error) {
         next(error);
     }
 };
 
-// PATCH update item status (quick status update)
-exports.updateItemStatus = async (req, res, next) => {
+// ─── PATCH /api/items/:id/status ─────────────────────────────────────────────
+const updateItemStatus = async (req, res, next) => {
     try {
+        const id = parseInt(req.params.id);
+        if (isNaN(id) || id <= 0) {
+            return res.status(400).json({ success: false, message: 'Invalid item ID' });
+        }
+
         const { status } = req.body;
-        
+
         if (!status || !['Active', 'Claimed'].includes(status)) {
-            return res.status(400).json({
-                success: false,
-                message: 'Please provide a valid status (Active or Claimed)'
-            });
+            return res.status(400).json({ success: false, message: 'Status must be Active or Claimed' });
         }
-        
-        const updated = await itemModel.updateItem(req.params.id, { status });
-        
-        if (!updated) {
-            return res.status(404).json({
-                success: false,
-                message: 'Item not found'
-            });
+
+        const existing = await queryAsync('SELECT * FROM report WHERE id = ?', [id]);
+        if (existing.length === 0) {
+            return res.status(404).json({ success: false, message: 'Item not found' });
         }
-        
-        const item = await itemModel.getItemById(req.params.id);
-        
-        res.status(200).json({
-            success: true,
-            data: item
-        });
+
+        await queryAsync('UPDATE report SET status = ? WHERE id = ?', [status, id]);
+
+        const updated = await queryAsync('SELECT * FROM report WHERE id = ?', [id]);
+        res.json({ success: true, data: updated[0] });
     } catch (error) {
         next(error);
     }
 };
 
-// DELETE item
-exports.deleteItem = async (req, res, next) => {
+// ─── DELETE /api/items/:id ────────────────────────────────────────────────────
+const deleteItem = async (req, res, next) => {
     try {
-        const deleted = await itemModel.deleteItem(req.params.id);
-        
-        if (!deleted) {
-            return res.status(404).json({
-                success: false,
-                message: 'Item not found'
-            });
+        const id = parseInt(req.params.id);
+        if (isNaN(id) || id <= 0) {
+            return res.status(400).json({ success: false, message: 'Invalid item ID' });
         }
-        
-        res.status(200).json({
-            success: true,
-            message: 'Item deleted successfully'
-        });
+
+        const existing = await queryAsync('SELECT * FROM report WHERE id = ?', [id]);
+        if (existing.length === 0) {
+            return res.status(404).json({ success: false, message: 'Item not found' });
+        }
+
+        await queryAsync('DELETE FROM report WHERE id = ?', [id]);
+
+        res.json({ success: true, message: 'Report deleted successfully' });
     } catch (error) {
         next(error);
     }
 };
 
-// GET items by category
-exports.getItemsByCategory = async (req, res, next) => {
-    try {
-        const { category } = req.params;
-        
-        if (!['Lost', 'Found'].includes(category)) {
-            return res.status(400).json({
-                success: false,
-                message: 'Category must be either Lost or Found'
-            });
-        }
-        
-        const items = await itemModel.getAllItems({ category });
-        
-        res.status(200).json({
-            success: true,
-            count: items.length,
-            data: items
-        });
-    } catch (error) {
-        next(error);
-    }
-};
-
-// GET statistics
-exports.getStats = async (req, res, next) => {
-    try {
-        const stats = await itemModel.getStats();
-        res.status(200).json({
-            success: true,
-            data: stats
-        });
-    } catch (error) {
-        next(error);
-    }
+module.exports = {
+    getAllItems,
+    getStats,
+    getItemsByCategory,
+    getItem,
+    createItem,
+    updateItem,
+    updateItemStatus,
+    deleteItem
 };

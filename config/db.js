@@ -26,32 +26,15 @@ const connectDB = async () => {
     }
 };
 
-// Helper function for queries (callback style for compatibility)
-const query = (sql, params, callback) => {
-    pool.query(sql, params, (error, results) => {
-        if (error) {
-            console.error('Query error:', error);
-            callback(error, null);
-        } else {
-            callback(null, results);
-        }
-    });
-};
-
-// Helper function for promises
+// Helper for async queries with parameterized inputs (prevents SQL injection)
 const queryAsync = async (sql, params) => {
     try {
         const [results] = await promisePool.query(sql, params);
         return results;
     } catch (error) {
-        console.error('Query async error:', error);
+        console.error('Query error:', error);
         throw error;
     }
 };
 
-module.exports = { 
-    promisePool, 
-    connectDB,
-    query,
-    queryAsync 
-};
+module.exports = { promisePool, connectDB, queryAsync };
