@@ -26,9 +26,10 @@
 ## INSTALLATION STEPS
 1. Clone the repository
 Using Git (if installed)
-run cmd:
->> git clone <https://github.com/vwsdlxy/QIU-Lost-Found.git>
->> cd QIU-Lost-Found
+```bash
+git clone https://github.com/vwsdlxy/QIU-Lost-Found.git
+cd QIU-Lost-Found
+```
 
 2. Open index.html in your browser
 
