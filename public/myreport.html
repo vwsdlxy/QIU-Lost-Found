@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Reports - QIU Lost & Found</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Top bar (exactly like view.html) -->
+    <div class="topbar">
+        <h1 class="campus-name"> QIU </h1>
+        <h1 class="page-name"> MY REPORTS </h1>
+        <div class="menu-container">
+            <button class="menu-btn" onclick="toggleMenu()">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+            <!-- Menu Modal Overlay -->
+            <div class="menu-overlay" id="menuOverlay" onclick="toggleMenu()"></div>
+            
+            <!-- Sliding Menu Panel -->
+            <nav class="menu-panel" id="menuPanel">
+                <div class="menu-header">
+                    <h3>Menu</h3>
+                    <button class="close-menu" onclick="toggleMenu()">
+                        <i class="fa-solid fa-times"></i>
+                    </button>
+                </div>
+                <ul class="menu-items">
+                    <li>
+                        <a href="dashboard.html">
+                            <i class="fa-solid fa-home"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="report.html">
+                            <i class="fa-solid fa-flag"></i>
+                            <span>Report Item</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="myreport.html" class="active">
+                            <i class="fa-solid fa-list"></i>
+                            <span>My Reports</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="view.html">
+                            <i class="fa-solid fa-eye"></i>
+                            <span>View Items</span>
+                        </a>
+                    </li>
+                    <li class="divider"></li>
+                    <li>
+                        <a href="login.html" class="logout">
+                            <i class="fa-solid fa-sign-out-alt"></i>
+                            <span>Logout</span>
+                        </a>
+                    </li>
+                </ul>
+                <div class="menu-footer">
+                    <p>QIU Lost & Found System</p>
+                    <p>&copy; 2026</p>
+                </div>
+            </nav>
+        </div>
+    </div>
+
+        <!-- Main Content -->
+    <main class="myreports-main">
+        <!-- Header with filter and actions on same line -->
+        <div class="myreports-header">
+            <!-- Filter Tabs (My Reports only) - Now on left -->
+            <div class="myreports-tabs">
+                <button class="tab-btn active" onclick="filterMyReports('all')" id="tabAll">
+                    <i class="fa-solid fa-list-ul"></i> All
+                </button>
+                <button class="tab-btn" onclick="filterMyReports('lost')" id="tabLost">
+                    <i class="fa-solid fa-circle-exclamation"></i> Lost
+                </button>
+                <button class="tab-btn" onclick="filterMyReports('found')" id="tabFound">
+                    <i class="fa-solid fa-circle-check"></i> Found
+                </button>
+                <button class="tab-btn" onclick="filterMyReports('active')" id="tabActive">
+                    <i class="fa-solid fa-hourglass-half"></i> Active
+                </button>
+                <button class="tab-btn" onclick="filterMyReports('claimed')" id="tabClaimed">
+                    <i class="fa-solid fa-check-circle"></i> Claimed
+                </button>
+            </div>
+
+            <!-- Right side with count and new report button -->
+            <div class="header-right">
+                <span id="reportCount" class="report-count-badge">0 items</span>
+                <button onclick="window.location.href='report.html'" class="new-report-btn">
+                    <i class="fa-solid fa-plus"></i> New Report
+                </button>
+            </div>
+        </div>
+
+        <!-- Reports Grid Container -->
+        <div id="myReportsContainer" class="myreports-grid">
+            <!-- JavaScript will populate here -->
+            <div class="loading-spinner">
+                <i class="fa-solid fa-spinner fa-spin"></i>
+                <p>Loading your reports...</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal for item details (shared) -->
+    <div id="itemModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Report Details</h2>
+                <span class="close-modal" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- dynamic content -->
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
