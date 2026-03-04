@@ -1,76 +1,61 @@
 /* =====================================================
-HOMEPAGE - LOGIN 
+HOMEPAGE - LOGIN (Simplified for Static Deployment)
 ===================================================== */
 document.addEventListener("DOMContentLoaded", () => {
     const LoginForm = document.getElementById("LoginForm");
     if (LoginForm) {
-    LoginForm.addEventListener("submit", async (e) => {
-        e.preventDefault();
+        LoginForm.addEventListener("submit", (e) => {
+            e.preventDefault();
 
-        const email = document.getElementById("loginEmail").value;
-        const password = document.getElementById("loginPassword").value;
-        const messageEl = document.getElementById("loginMessage");
-        const emailError = document.getElementById("emailError");
-        const passwordError = document.getElementById("passwordError");
+            const email = document.getElementById("loginEmail").value;
+            const password = document.getElementById("loginPassword").value;
+            const messageEl = document.getElementById("loginMessage");
+            const emailError = document.getElementById("emailError");
+            const passwordError = document.getElementById("passwordError");
 
-        // Clear previous errors
-        emailError.textContent = "";
-        passwordError.textContent = "";
-        messageEl.textContent = "";
+            // Clear previous errors
+            if (emailError) emailError.textContent = "";
+            if (passwordError) passwordError.textContent = "";
+            if (messageEl) messageEl.textContent = "";
 
-        if (!email) {
-        emailError.textContent = "Email is required";
-        return;
-        }
-        
-        const qiuEmailPattern = /^[a-zA-Z0-9._%+-]+@qiu\.edu\.my$/;
+            // --- Email Validation ---
+            if (!email) {
+                if (emailError) emailError.textContent = "Email is required";
+                return;
+            }
 
-        if (!qiuEmailPattern.test(email)) {
-        emailError.textContent = "Please use your QIU email.";
-        return;
-        }
+            const qiuEmailPattern = /^[a-zA-Z0-9._%+-]+@qiu\.edu\.my$/;
+            if (!qiuEmailPattern.test(email)) {
+                if (emailError) emailError.textContent = "Please use your QIU email.";
+                return;
+            }
 
-        if (!password) {
-        passwordError.textContent = "Password is required";
-        return;
-        }
+            // --- Password Validation ---
+            if (!password) {
+                if (passwordError) passwordError.textContent = "Password is required";
+                return;
+            }
 
-        try {
-        // User login - authenticate against database
-        const response = await fetch(`${API_BASE_URL}/login`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, password })
-        });
+            // --- Login Success (No Backend Needed) ---
+            console.log("Login successful for:", email);
 
-        const data = await response.json();
-
-        if (response.ok && data.success) {
-
-            // Store user info from database response
+            // Store user info in localStorage
             localStorage.setItem("loggedInEmail", email);
-            localStorage.setItem("userName", data.name);
-            localStorage.setItem("userId", data.userId);
+            // Extract name from email (e.g., "john.doe" from "john.doe@qiu.edu.my")
+            const userName = email.split('@')[0].replace(/[._-]/g, ' ');
+            localStorage.setItem("userName", userName);
+            localStorage.setItem("userId", Date.now().toString()); // Simple user ID
 
-            messageEl.textContent = "Login successful! Redirecting...";
-            messageEl.style.color = "green";
+            if (messageEl) {
+                messageEl.textContent = "Login successful! Redirecting...";
+                messageEl.style.color = "green";
+            }
 
+            // Redirect to dashboard
             setTimeout(() => {
-            window.location.href = "dashboard.html"; // Redirect to dashboard, not home.html
+                window.location.href = "dashboard.html";
             }, 1000);
-
-        } else {
-            // Show invalid account message for any failed login
-            messageEl.textContent = "Invalid email or password.";
-            messageEl.style.color = "red";
-        }
-
-        } catch (error) {
-        console.error("Login error:", error);
-        messageEl.textContent = "Server error. Please try again.";
-        messageEl.style.color = "red";
-        }
-    });
+        });
     }
 });
 
@@ -107,7 +92,7 @@ document.addEventListener('keydown', function(event) {
 MULTI-STEP FORM FOR REPORT PAGE
 ===================================================== */
 // API endpoint - update this with your actual backend URL
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = '';
 
 // Current section tracker
 let currentSection = 1;
@@ -1892,4 +1877,5 @@ function deleteReportFromLocal(itemId) {
     alert('Report deleted successfully!');
     loadMyReports(); // Reload to update count
     closeModal();
+
 }
