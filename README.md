@@ -48,7 +48,7 @@ node server.js
 - Manage your reports in 'My Reports'
 
 ## LIVE DEMO
-Netlify URL : https://qiu-lost-found.netlify.app/
+Netlify URL : https://qiulostfound.netlify.app/
 
 ## LICENSE
 MIT
