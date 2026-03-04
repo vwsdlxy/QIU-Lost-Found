@@ -107,7 +107,7 @@ document.addEventListener('keydown', function(event) {
 MULTI-STEP FORM FOR REPORT PAGE
 ===================================================== */
 // API endpoint - update this with your actual backend URL
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = 'https://qiu-lost-found-backend.onrender.com/api';
 
 // Current section tracker
 let currentSection = 1;
