@@ -1251,7 +1251,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const userEmail = localStorage.getItem("loggedInEmail");
     if (!userEmail) {
         // Redirect to login if not logged in
-        window.location.href = "login.html";
+        window.location.href = "index.html";
         return;
     }
     
@@ -1274,7 +1274,7 @@ function logout() {
         localStorage.removeItem("loggedInEmail");
         localStorage.removeItem("userName");
         localStorage.removeItem("userId");
-        window.location.href = "login.html";
+        window.location.href = "index.html";
     }
 }
 
@@ -1418,7 +1418,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Check if user is logged in
         const userEmail = localStorage.getItem("loggedInEmail");
         if (!userEmail) {
-            window.location.href = "login.html";
+            window.location.href = "";
             return;
         }
         

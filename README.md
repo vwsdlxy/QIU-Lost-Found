@@ -29,7 +29,7 @@ run cmd:
 >> git clone <https://github.com/vwsdlxy/QIU-Lost-Found.git>
 >> cd QIU-Lost-Found
 
-2. Open login.html in your browser
+2. Open index.html in your browser
 
 # USAGE
 - Login with your QIU email
@@ -38,7 +38,7 @@ run cmd:
 - Manage your reports in 'My Reports'
 
 # LIVE DEMO
-[Add your Netlify URL here after deployment]
+Netlify URL : https://qiu-lost-found.netlify.app/
 
 # LICENSE
 MIT
