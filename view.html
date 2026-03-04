@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>View Items - QIU Lost & Found</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head> 
+<body>
+    <!-- Top bar -->
+    <div class="topbar">
+        <h1 class="campus-name"> QIU </h1>
+        <h1 class="page-name"> View Items </h1>
+        <div class="menu-container">
+            <button class="menu-btn" onclick="toggleMenu()">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+            <!-- Menu Modal Overlay -->
+            <div class="menu-overlay" id="menuOverlay" onclick="toggleMenu()"></div>
+            
+            <!-- Sliding Menu Panel -->
+            <nav class="menu-panel" id="menuPanel">
+                <div class="menu-header">
+                    <h3>Menu</h3>
+                    <button class="close-menu" onclick="toggleMenu()">
+                        <i class="fa-solid fa-times"></i>
+                    </button>
+                </div>
+                <ul class="menu-items">
+                    <li>
+                        <a href="dashboard.html">
+                            <i class="fa-solid fa-home"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="report.html">
+                            <i class="fa-solid fa-flag"></i>
+                            <span>Report Item</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="myreport.html">
+                            <i class="fa-solid fa-list"></i>
+                            <span>My Reports</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="view.html" class="active">
+                            <i class="fa-solid fa-eye"></i>
+                            <span>View Items</span>
+                        </a>
+                    </li>
+                    <li class="divider"></li>
+                    <li>
+                        <a href="login.html" class="logout">
+                            <i class="fa-solid fa-sign-out-alt"></i>
+                            <span>Logout</span>
+                        </a>
+                    </li>
+                </ul>
+                <div class="menu-footer">
+                    <p>QIU Lost & Found System</p>
+                    <p>&copy; 2026</p>
+                </div>
+            </nav>
+        </div>
+    </div>
+
+    <!-- View Items Content -->
+    <div class="view-header">
+        <h2>Browse Lost & Found Items</h2>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="filter-section">
+        <!-- Category Filters - Smaller and side by side -->
+        <div class="filter-group">
+            <span class="filter-label">Category:</span>
+            <div class="filter-buttons">
+                <button class="filter-btn category-btn lost" data-category="lost" onclick="toggleCategory('lost')">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                    Lost
+                </button>
+                <button class="filter-btn category-btn found" data-category="found" onclick="toggleCategory('found')">
+                    <i class="fa-solid fa-circle-check"></i>
+                    Found
+                </button>
+            </div>
+        </div>
+
+        <!-- Status Filters -->
+        <div class="filter-group">
+            <span class="filter-label">Status:</span>
+            <div class="filter-buttons">
+                <button class="filter-btn status-btn" data-status="active" onclick="toggleStatus('active')">
+                    <i class="fa-solid fa-hourglass-half"></i>
+                    Active
+                </button>
+                <button class="filter-btn status-btn" data-status="claimed" onclick="toggleStatus('claimed')">
+                    <i class="fa-solid fa-check-circle"></i>
+                    Claimed
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Items Grid Container -->
+    <div id="itemsContainer" class="items-grid">
+        <!-- Items will be dynamically loaded here -->
+        <div class="loading-spinner">
+            <i class="fa-solid fa-spinner fa-spin"></i>
+            <p>Loading items...</p>
+        </div>
+    </div>
+
+    <!-- Modal for Item Details -->
+    <div id="itemModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Item Details</h2>
+                <span class="close-modal" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Item details will be loaded here dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js?v=4"></script>
+</body>
+</html>
