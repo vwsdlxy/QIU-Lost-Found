@@ -396,14 +396,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     console.log('Response data:', data);
 
                     if (response.ok && data.success) {
-                        alert("Report submitted successfully to database!");
+                        alert("Report submitted successfully!");
                         
-                        // Redirect based on category
-                        if (formData.category === "Lost") {
-                            window.location.href = "view-lost.html";
-                        } else {
-                            window.location.href = "view-found.html";
-                        }
+                        // Navigate to My Reports page to see the new report
+                        window.location.href = "myreport.html";
+                        
                     } else {
                         alert(data.message || 'Error submitting report to database');
                         submitBtn.innerHTML = originalText;
@@ -706,7 +703,7 @@ if(lostForm){
         items.push(item);
         localStorage.setItem("items", JSON.stringify(items));
         alert("Lost item reported!");
-        window.location.href="view-lost.html";
+        window.location.href="myreport.html";
     });
 }
 
@@ -728,7 +725,7 @@ if(foundForm){
         items.push(item);
         localStorage.setItem("items", JSON.stringify(items));
         alert("Found item reported!");
-        window.location.href="view-found.html";
+        window.location.href="myreport.html";
     });
 }
 
@@ -1677,19 +1674,32 @@ async function showMyReportDetails(itemId) {
     }
 }
 
-// Display modal with report details (with action buttons for My Reports)
+// Display modal with report details (with complete details like view page)
 function displayMyReportModal(item) {
     const modal = document.getElementById('itemModal');
     const modalBody = document.getElementById('modalBody');
     
-    // Format dates
+    // Format dates with time (like view page)
     const createdDate = item.created_at ? new Date(item.created_at) : new Date(item.date || Date.now());
+    const updatedDate = item.updated_at ? new Date(item.updated_at) : new Date();
+    
     const formattedCreated = createdDate.toLocaleString('en-MY', {
         year: 'numeric',
         month: 'long',
         day: 'numeric',
         hour: '2-digit',
-        minute: '-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+    });
+    
+    const formattedUpdated = updatedDate.toLocaleString('en-MY', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
         hour12: true
     });
     
@@ -1732,6 +1742,8 @@ function displayMyReportModal(item) {
                             <span>${escapeHtml(item.contact_phone)}</span>
                         </div>
                     ` : ''}
+                    ${!item.contact_email && !item.contact_phone ? 
+                        '<p>No contact information provided</p>' : ''}
                 </div>
             </div>
             
@@ -1746,35 +1758,32 @@ function displayMyReportModal(item) {
             </div>
             
             <div class="modal-detail-group">
-                <h3><i class="fa-solid fa-clock"></i> Reported On</h3>
+                <h3><i class="fa-solid fa-clock"></i> Timestamps</h3>
                 <div class="modal-timestamp">
                     <div>
                         <i class="fa-solid fa-calendar-plus"></i>
                         <strong>Created:</strong> ${formattedCreated}
                     </div>
+                    <div>
+                        <i class="fa-solid fa-calendar-check"></i>
+                        <strong>Last Updated:</strong> ${formattedUpdated}
+                    </div>
                 </div>
             </div>
             
+            <!-- Single "Got It" button only -->
             <div class="modal-actions">
-                ${statusDisplay.toLowerCase() === 'active' ? 
-                    `<button onclick="markAsClaimedFromModal(${item.id})" class="modal-btn modal-btn-primary">
-                        <i class="fa-solid fa-check-circle"></i> Mark as Claimed
-                    </button>` : 
-                    `<button class="modal-btn modal-btn-primary" disabled style="opacity:0.5; cursor:not-allowed;">
-                        <i class="fa-solid fa-check-circle"></i> Already Claimed
-                    </button>`
-                }
-                <button onclick="deleteReportFromModal(${item.id})" class="modal-btn modal-btn-danger">
-                    <i class="fa-solid fa-trash"></i> Delete
-                </button>
-                <button onclick="closeModal()" class="modal-btn modal-btn-secondary">
-                    <i class="fa-solid fa-arrow-left"></i> Back
+                <button onclick="closeModal()" class="modal-btn modal-btn-primary">
+                    <i class="fa-solid fa-check"></i> Got It
                 </button>
             </div>
         </div>
     `;
     
+    // Show modal
     modal.style.display = 'block';
+    
+    // Prevent body scrolling when modal is open
     document.body.style.overflow = 'hidden';
 }
 
