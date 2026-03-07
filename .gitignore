@@ -1,0 +1,18 @@
+# Node modules - NEVER commit these
+node_modules/
+
+# Environment files
+.env
+.env.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# But keep our important files!
+!*.min.js
+!*.min.css
