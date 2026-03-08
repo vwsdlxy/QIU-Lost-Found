@@ -1434,7 +1434,7 @@ document.addEventListener('DOMContentLoaded', function() {
 async function loadMyReports() {
     const container = document.getElementById('myReportsContainer');
     const userEmail = localStorage.getItem("loggedInEmail");
-    
+    const userId = localStorage.getItem("userId");
     if (!userEmail) return;
     
     try {
@@ -1445,7 +1445,8 @@ async function loadMyReports() {
         if (data.success && data.data) {
             // Filter items where contact_email matches logged in user
             const userReports = data.data.filter(item => 
-                item.contact_email && item.contact_email.toLowerCase() === userEmail.toLowerCase()
+                String(item.member_id) === String(userId) ||
+                (item.contact_email && item.contact_email.toLowerCase() === userEmail.toLowerCase())
             );
             
             // Update report count
