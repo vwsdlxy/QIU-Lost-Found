@@ -16,6 +16,8 @@
 - Delete reports
 - Responsive design for mobile devices
 
+Quick Tips: Email input in contact information section when submitting a report should match with logged-in email.
+
 ## TECHNOLOGIES USED
 - HTML5
 - CSS3 (Flexbox & Grid)
@@ -32,7 +34,7 @@
 2. Download the folder Web_Technologies_FA
 3. Start MySQL
 4. Create database (lost_found_db) and run each section
-5. Download dependencies
+5. Download dependencies in both frontend and backend folder
 ```bash
 npm install 
 ```
