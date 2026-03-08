@@ -49,8 +49,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
             // Store user info from database response
             localStorage.setItem("loggedInEmail", email);
-            localStorage.setItem("userName", data.name);
-            localStorage.setItem("userId", data.userId);
+            localStorage.setItem("userName", data.data.name);
+            localStorage.setItem("userId", data.data.member_id);
 
             messageEl.textContent = "Login successful! Redirecting...";
             messageEl.style.color = "green";
@@ -377,7 +377,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     location: document.getElementById('reportLocation').value,
                     contact_email: document.getElementById('reportContactEmail').value || userEmail || null,
                     contact_phone: fullPhoneNumber,
-                    status: "Active"
+                    status: "Active",
+                    member_id: localStorage.getItem("userId")
                 };
 
                 try {
