@@ -3,7 +3,7 @@
 1. Features
 2. Technologies Used
 3. Local Installation
-4. Usage
+4. Test Credentials
 5. Live Demo
 6. License
 
@@ -24,31 +24,37 @@
 - Google Fonts
 
 ## LOCAL INSTALLATION 
-1. Start MySQL
-2. Create database (lost_found_db) and run each section
-3. Download dependencies
+1. Install required software 
+- Node.js
+- MySQL
+- Git
+- VS Code (optional)
+2. Download the folder Web_Technologies_FA
+3. Start MySQL
+4. Create database (lost_found_db) and run each section
+5. Download dependencies
 ```bash
 npm install 
 ```
-4. Create .env file (follow example given in folder)
-5. Start server
+6. Create .env file (follow example given in folder)
+7. Start server
 ```bash
 node server.js
 ```
-6. Open index.html in your browser
+8. Open index.html in your browser
 
-## USAGE
-- Login with your QIU email
-  (assumptions: login credentials were set in database. You can use the credentials below to login:
-  email: vincevoon@qiu.edu.my; password: Vince@123
-  or
-  email: johnsmith@qiu.edu.my; password: John@123)
-- Report items using the multi-step form
-- Browse all reports in the view page
-- Manage your reports in 'My Reports'
+## TEST CREDENTIALS
+Login with your QIU email
+
+Tips: login credentials were set in database. You can use the credentials below to login:
+  
+>> email: johnsmith@qiu.edu.my
+>>password: john123
+  
+or any existing account in database.
 
 ## LIVE DEMO
-Netlify URL : https://qiulostfound.netlify.app/
+Access the application here: https://vwsdlxy.github.io/QIU-Lost-Found/index.html
 
 ## LICENSE
 MIT
