@@ -1477,7 +1477,8 @@ function loadMyReportsFromLocal() {
     const items = JSON.parse(localStorage.getItem("items")) || [];
     
     // Filter items by contact email (case insensitive)
-    const userReports = items.filter(item => 
+    const userReports = data.data.filter(item => 
+        String(item.member_id) === String(userId) ||
         item.contact_email && item.contact_email.toLowerCase() === userEmail.toLowerCase()
     );
     
