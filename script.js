@@ -4,7 +4,7 @@ HOMEPAGE - LOGIN
 document.addEventListener("DOMContentLoaded", () => {
     const LoginForm = document.getElementById("LoginForm");
     if (LoginForm) {
-        LoginForm.addEventListener("submit", async (e) => {
+    LoginForm.addEventListener("submit", async (e) => {
         e.preventDefault();
 
         const email = document.getElementById("loginEmail").value;
