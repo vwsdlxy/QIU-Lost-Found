@@ -1471,7 +1471,7 @@ async function loadMyReports() {
 function loadMyReportsFromLocal() {
     const container = document.getElementById('myReportsContainer');
     const userEmail = localStorage.getItem("loggedInEmail");
-    
+    const userId = localStorage.getItem("userId");
     if (!userEmail) return;
     
     const items = JSON.parse(localStorage.getItem("items")) || [];
