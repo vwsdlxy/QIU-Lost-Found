@@ -513,7 +513,7 @@ function displayLostItems(items) {
                 <p><i class="fa-solid fa-location-dot"></i> ${item.location}</p>
                 <p><i class="fa-solid fa-circle-info"></i> Status: ${item.status}</p>
                 <p><i class="fa-solid fa-calendar"></i> ${new Date(item.created_at).toLocaleDateString()}</p>
-                <a href="details.html?id=${item.id}" class="view-btn">View Details</a>
+                <a href="details.html?id=${item.report_id}" class="view-btn">View Details</a>
             </div>
         `;
     });
@@ -538,7 +538,7 @@ function displayFoundItems(items) {
                 <p><i class="fa-solid fa-location-dot"></i> ${item.location}</p>
                 <p><i class="fa-solid fa-circle-info"></i> Status: ${item.status}</p>
                 <p><i class="fa-solid fa-calendar"></i> ${new Date(item.created_at).toLocaleDateString()}</p>
-                <a href="details.html?id=${item.id}" class="view-btn">View Details</a>
+                <a href="details.html?id=${item.report_id}" class="view-btn">View Details</a>
             </div>
         `;
     });
@@ -582,11 +582,11 @@ function displayItemDetails(item) {
             
             <div class="action-buttons">
                 ${item.status === 'Active' ? 
-                    `<button onclick="updateStatusInDB(${item.id})" class="btn-resolve">
+                    `<button onclick="updateStatusInDB(${item.report_id})" class="btn-resolve">
                         <i class="fa-solid fa-check-circle"></i> Mark as Claimed
                     </button>` : 
                     ''}
-                <button onclick="deleteItemFromDB(${item.id})" class="btn-delete">
+                <button onclick="deleteItemFromDB(${item.report_id})" class="btn-delete">
                     <i class="fa-solid fa-trash"></i> Delete Report
                 </button>
                 <button onclick="window.history.back()" class="btn-back">
@@ -741,7 +741,7 @@ if (document.getElementById('lostItems') && !window.location.href.includes('data
                 <h3>${item.title}</h3>
                 <p>${item.location}</p>
                 <p>Status: ${item.status}</p>
-                <a href="details.html?id=${item.id}">View Details</a>
+                <a href="details.html?id=${item.report_id}">View Details</a>
             </div>
         `;
     });
@@ -755,7 +755,7 @@ if (document.getElementById('foundItems') && !window.location.href.includes('dat
                 <h3>${item.title}</h3>
                 <p>${item.location}</p>
                 <p>Status: ${item.status}</p>
-                <a href="details.html?id=${item.id}">View Details</a>
+                <a href="details.html?id=${item.report_id}">View Details</a>
             </div>
         `;
     });
@@ -775,8 +775,8 @@ if (document.getElementById('details') && !window.location.href.includes('databa
             <p>Date: ${item.date}</p>
             <p>Contact: ${item.contact}</p>
             <p>Status: ${item.status}</p>
-            <button onclick="updateStatus(${item.id})">Mark as Claimed</button>
-            <button onclick="deleteItem(${item.id})">Delete Report</button>
+            <button onclick="updateStatus(${item.report_id})">Mark as Claimed</button>
+            <button onclick="deleteItem(${item.report_id})">Delete Report</button>
         `;
     }
 }
@@ -784,7 +784,7 @@ if (document.getElementById('details') && !window.location.href.includes('databa
 // Legacy status update
 function updateStatus(id){
     items = items.map(item => {
-        if(item.id == id){
+        if(item.report_id == id){
             item.status = "Claimed";
         }
         return item;
@@ -796,7 +796,7 @@ function updateStatus(id){
 
 // Legacy delete
 function deleteItem(id){
-    items = items.filter(item => item.id != id);
+    items = items.filter(item => item.report_id != id);
     localStorage.setItem("items", JSON.stringify(items));
     alert("Item Deleted");
     window.location.href="index.html";
@@ -1025,7 +1025,7 @@ function createViewItemCard(item) {
             </div>
         </div>
         
-        <button onclick="showItemDetails(${item.id})" class="view-details-btn">
+        <button onclick="showItemDetails(${item.report_id})" class="view-details-btn">
             <i class="fa-solid fa-eye"></i>
             View Details
         </button>
@@ -1370,7 +1370,7 @@ function displayRecentItems(items) {
                     <i class="fa-solid fa-clock"></i> ${formattedDate}
                 </p>
             </div>
-            <a href="#" onclick="showItemDetails(${item.id}); return false;" class="view-link">
+            <a href="#" onclick="showItemDetails(${item.report_id}); return false;" class="view-link">
                 View <i class="fa-solid fa-arrow-right"></i>
             </a>
         `;
@@ -1537,7 +1537,7 @@ function createMyReportCard(report) {
     card.className = `myreport-card ${report.category.toLowerCase()}`;
     card.setAttribute('data-category', report.category.toLowerCase());
     card.setAttribute('data-status', (report.status || 'active').toLowerCase());
-    card.setAttribute('data-id', report.id); // Add data-id for easy selection
+    card.setAttribute('data-id', report.report_id); // Add data-id for easy selection
     
     // Format date
     const reportDate = report.created_at ? new Date(report.created_at) : new Date(report.date || Date.now());
@@ -1591,18 +1591,18 @@ function createMyReportCard(report) {
         </div>
         
         <div class="myreport-actions">
-            <button onclick="showMyReportDetails(${report.id})" class="action-btn view-btn">
+            <button onclick="showMyReportDetails(${report.report_id})" class="action-btn view-btn">
                 <i class="fa-solid fa-eye"></i> View Details
             </button>
             ${statusDisplay.toLowerCase() === 'active' ? 
-                `<button onclick="markAsClaimedFromMyReports(${report.id})" class="action-btn claim-btn">
+                `<button onclick="markAsClaimedFromMyReports(${report.report_id})" class="action-btn claim-btn">
                     <i class="fa-solid fa-check-circle"></i> Mark Claimed
                 </button>` : 
                 `<button class="action-btn claimed-btn" disabled>
                     <i class="fa-solid fa-check-circle"></i> Claimed
                 </button>`
             }
-            <button onclick="deleteReportFromMyReports(${report.id})" class="action-btn delete-btn">
+            <button onclick="deleteReportFromMyReports(${report.report_id})" class="action-btn delete-btn">
                 <i class="fa-solid fa-trash"></i> Delete
             </button>
         </div>
@@ -1883,7 +1883,7 @@ async function deleteReportFromModal(itemId) {
 // LocalStorage fallback for deleting report
 function deleteReportFromLocal(itemId) {
     let items = JSON.parse(localStorage.getItem("items")) || [];
-    items = items.filter(item => item.id != itemId);
+    items = items.filter(item => item.report_id != itemId);
     localStorage.setItem("items", JSON.stringify(items));
     
     // Remove the card from DOM
