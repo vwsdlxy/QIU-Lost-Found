@@ -1,0 +1,32 @@
+{
+  "name": "lost-found-frontend",
+  "version": "1.0.0",
+  "description": "1. Features\r 2. Technologies Used\r 3. Local Installation\r 4. Usage\r 5. Live Demo\r 6. License",
+  "main": "minify.js",
+  "dependencies": {
+    "acorn": "^8.16.0",
+    "buffer-from": "^1.1.2",
+    "clean-css": "^5.3.3",
+    "commander": "^2.20.3",
+    "source-map": "^0.6.1",
+    "source-map-support": "^0.5.21",
+    "terser": "^5.46.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "minify": "node minify.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vwsdlxy/QIU-Lost-Found.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/vwsdlxy/QIU-Lost-Found/issues"
+  },
+  "homepage": "https://github.com/vwsdlxy/QIU-Lost-Found#readme"
+}
